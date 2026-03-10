@@ -89,6 +89,7 @@ private:
 
 	bool m_shiftPressed = false;
 	KeyMap::KeyMapNode m_lastSteerWheelNode;
+	void updateSteerWheelPath(const KeyMap::KeyMapNode &node);
 	
     // steer wheel
     struct

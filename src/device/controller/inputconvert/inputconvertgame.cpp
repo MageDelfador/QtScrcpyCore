@@ -272,25 +272,25 @@ void InputConvertGame::getDelayQueue(const QPointF& start, const QPointF& end,
     double x2 = end.x();
     double y2 = end.y();
 
-    double dx=x2-x1;
-    double dy=y2-y1;
-    double e=(fabs(dx)>fabs(dy))?fabs(dx):fabs(dy);
-    e /= distanceStep;
-    dx/=e;
-    dy/=e;
+    double dx = x2 - x1;
+    double dy = y2 - y1;
 
-    QQueue<QPointF> queue;
-    QQueue<quint32> queue2;
-    for(int i=1;i<=e;i++) {
-        QPointF pos(x1+(QRandomGenerator::global()->bounded(posStepconst*2)-posStepconst), y1+(QRandomGenerator::global()->bounded(posStepconst*2)-posStepconst));
-        queue.enqueue(pos);
-        queue2.enqueue(QRandomGenerator::global()->bounded(lowestTimer, highestTimer));
-        x1+=dx;
-        y1+=dy;
+    double maxDist = qMax(fabs(dx), fabs(dy));
+
+    int steps = qMax(1, static_cast<int>(ceil(maxDist / distanceStep)));
+
+    double stepX = dx / steps;
+    double stepY = dy / steps;
+
+    for (int i = 0; i < steps; ++i) {
+
+        QPointF pos(x1 + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst),
+                    y1 + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst));
+        queuePos.enqueue(pos);
+        queueTimer.enqueue(QRandomGenerator::global()->bounded(lowestTimer, highestTimer));
+        x1 += stepX;
+        y1 += stepY;
     }
-
-    queuePos = queue;
-    queueTimer = queue2;
 }
 
 void InputConvertGame::onSteerWheelTimer() {

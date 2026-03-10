@@ -712,6 +712,43 @@ bool InputConvertGame::switchGameMap()
     if (!m_gameMap) {
         stopMouseMoveTimer();
         mouseMoveStopTouch();
+
+        if (m_ctrlSteerWheel.delayData.timer) {
+            m_ctrlSteerWheel.delayData.timer->stop();
+            m_ctrlSteerWheel.delayData.queuePos.clear();
+            m_ctrlSteerWheel.delayData.queueTimer.clear();
+        }
+        if (m_ctrlSteerWheel.touchKey != 0) {
+            int id = getTouchID(m_ctrlSteerWheel.touchKey);
+            if (id != -1) {
+                sendTouchUpEvent(id, m_ctrlSteerWheel.delayData.currentPos);
+                detachTouchID(m_ctrlSteerWheel.touchKey);
+            }
+            m_ctrlSteerWheel.touchKey = 0;
+        }
+        m_ctrlSteerWheel.pressedUp = false;
+        m_ctrlSteerWheel.pressedRight = false;
+        m_ctrlSteerWheel.pressedDown = false;
+        m_ctrlSteerWheel.pressedLeft = false;
+        m_ctrlSteerWheel.delayData.pressedNum = 0;
+        m_ctrlSteerWheel.delayData.currentPos = QPointF();
+
+        if (m_dragDelayData.timer) {
+            m_dragDelayData.timer->stop();
+            delete m_dragDelayData.timer;
+            m_dragDelayData.timer = nullptr;
+            m_dragDelayData.queuePos.clear();
+            m_dragDelayData.queueTimer.clear();
+        }
+        if (m_dragDelayData.pressKey != 0) {
+            int id = getTouchID(m_dragDelayData.pressKey);
+            if (id != -1) {
+                sendTouchUpEvent(id, m_dragDelayData.currentPos);
+                detachTouchID(m_dragDelayData.pressKey);
+            }
+            m_dragDelayData.pressKey = 0;
+        }
+        m_dragDelayData.currentPos = QPointF();
     }
 
     return m_gameMap;

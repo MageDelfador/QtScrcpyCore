@@ -87,6 +87,9 @@ private:
 
     bool m_processMouseMove = true;
 
+	bool m_shiftPressed = false;
+	KeyMap::KeyMapNode m_lastSteerWheelNode;
+	
     // steer wheel
     struct
     {

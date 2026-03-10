@@ -55,6 +55,44 @@ void InputConvertGame::wheelEvent(const QWheelEvent *from, const QSize &frameSiz
     }
 }
 
+void InputConvertGame::updateSteerWheelPath(const KeyMap::KeyMapNode &node)
+{
+    if (m_ctrlSteerWheel.delayData.pressedNum == 0)
+        return;
+
+    QPointF offset(0.0, 0.0);
+    if (m_ctrlSteerWheel.pressedUp)
+        offset.ry() -= node.data.steerWheel.up.extendOffset;
+    if (m_ctrlSteerWheel.pressedRight)
+        offset.rx() += node.data.steerWheel.right.extendOffset;
+    if (m_ctrlSteerWheel.pressedDown)
+        offset.ry() += node.data.steerWheel.down.extendOffset;
+    if (m_ctrlSteerWheel.pressedLeft)
+        offset.rx() -= node.data.steerWheel.left.extendOffset;
+
+    const float shiftFactor = 2.0f;
+    if (m_shiftPressed && m_ctrlSteerWheel.pressedUp) {
+        offset *= shiftFactor;
+    }
+
+    m_ctrlSteerWheel.delayData.timer->stop();
+    m_ctrlSteerWheel.delayData.queueTimer.clear();
+    m_ctrlSteerWheel.delayData.queuePos.clear();
+
+    QPointF startPos = m_ctrlSteerWheel.delayData.currentPos;
+    if (startPos.isNull()) {
+        startPos = node.data.steerWheel.centerPos;
+    }
+    QPointF endPos = node.data.steerWheel.centerPos + offset;
+
+    getDelayQueue(startPos, endPos,
+                  0.01f, 0.002f, 2, 8,
+                  m_ctrlSteerWheel.delayData.queuePos,
+                  m_ctrlSteerWheel.delayData.queueTimer);
+
+    m_ctrlSteerWheel.delayData.timer->start();
+}
+
 void InputConvertGame::keyEvent(const QKeyEvent *from, const QSize &frameSize, const QSize &showSize)
 {
     // 处理开关按键
@@ -67,7 +105,19 @@ void InputConvertGame::keyEvent(const QKeyEvent *from, const QSize &frameSize, c
         }
         return;
     }
-
+	
+    if (from->key() == Qt::Key_Shift) {
+        bool wasPressed = m_shiftPressed;
+        m_shiftPressed = (from->type() == QEvent::KeyPress);
+        if (wasPressed != m_shiftPressed) {
+            if (m_ctrlSteerWheel.pressedUp || m_ctrlSteerWheel.pressedRight ||
+                m_ctrlSteerWheel.pressedDown || m_ctrlSteerWheel.pressedLeft) {
+                updateSteerWheelPath(m_lastSteerWheelNode);
+            }
+        }
+        return;
+    }
+	
     const KeyMap::KeyMapNode &node = m_keyMap.getKeyMapNodeKey(from->key());
     // 处理特殊按键：可以释放出鼠标的按键
     if (m_needBackMouseMove && KeyMap::KMT_CLICK == node.type && node.data.click.switchMap) {
@@ -316,7 +366,7 @@ void InputConvertGame::processSteerWheel(const KeyMap::KeyMapNode &node, const Q
 {
     int key = from->key();
     bool flag = from->type() == QEvent::KeyPress;
-    // identify keys
+
     if (key == node.data.steerWheel.up.key) {
         m_ctrlSteerWheel.pressedUp = flag;
     } else if (key == node.data.steerWheel.right.key) {
@@ -327,63 +377,35 @@ void InputConvertGame::processSteerWheel(const KeyMap::KeyMapNode &node, const Q
         m_ctrlSteerWheel.pressedLeft = flag;
     }
 
-    // calc offset and pressed number
-    QPointF offset(0.0, 0.0);
     int pressedNum = 0;
-    if (m_ctrlSteerWheel.pressedUp) {
-        ++pressedNum;
-        offset.ry() -= node.data.steerWheel.up.extendOffset;
-    }
-    if (m_ctrlSteerWheel.pressedRight) {
-        ++pressedNum;
-        offset.rx() += node.data.steerWheel.right.extendOffset;
-    }
-    if (m_ctrlSteerWheel.pressedDown) {
-        ++pressedNum;
-        offset.ry() += node.data.steerWheel.down.extendOffset;
-    }
-    if (m_ctrlSteerWheel.pressedLeft) {
-        ++pressedNum;
-        offset.rx() -= node.data.steerWheel.left.extendOffset;
-    }
+    if (m_ctrlSteerWheel.pressedUp) ++pressedNum;
+    if (m_ctrlSteerWheel.pressedRight) ++pressedNum;
+    if (m_ctrlSteerWheel.pressedDown) ++pressedNum;
+    if (m_ctrlSteerWheel.pressedLeft) ++pressedNum;
     m_ctrlSteerWheel.delayData.pressedNum = pressedNum;
 
-    // last key release and timer no active, active timer to detouch
+    m_lastSteerWheelNode = node;
+
     if (pressedNum == 0) {
         if (m_ctrlSteerWheel.delayData.timer->isActive()) {
             m_ctrlSteerWheel.delayData.timer->stop();
             m_ctrlSteerWheel.delayData.queueTimer.clear();
             m_ctrlSteerWheel.delayData.queuePos.clear();
         }
-
-        sendTouchUpEvent(getTouchID(m_ctrlSteerWheel.touchKey), m_ctrlSteerWheel.delayData.currentPos);
+        int id = getTouchID(m_ctrlSteerWheel.touchKey);
+        sendTouchUpEvent(id, m_ctrlSteerWheel.delayData.currentPos);
         detachTouchID(m_ctrlSteerWheel.touchKey);
         return;
     }
 
-    // process steer wheel key event
-    m_ctrlSteerWheel.delayData.timer->stop();
-    m_ctrlSteerWheel.delayData.queueTimer.clear();
-    m_ctrlSteerWheel.delayData.queuePos.clear();
-
-    // first press, get key and touch down
     if (pressedNum == 1 && flag) {
         m_ctrlSteerWheel.touchKey = from->key();
         int id = attachTouchID(m_ctrlSteerWheel.touchKey);
         sendTouchDownEvent(id, node.data.steerWheel.centerPos);
-
-        getDelayQueue(node.data.steerWheel.centerPos, node.data.steerWheel.centerPos+offset,
-                      0.01f, 0.002f, 2, 8,
-                      m_ctrlSteerWheel.delayData.queuePos,
-                      m_ctrlSteerWheel.delayData.queueTimer);
-    } else {
-        getDelayQueue(m_ctrlSteerWheel.delayData.currentPos, node.data.steerWheel.centerPos+offset,
-                      0.01f, 0.002f, 2, 8,
-                      m_ctrlSteerWheel.delayData.queuePos,
-                      m_ctrlSteerWheel.delayData.queueTimer);
+        m_ctrlSteerWheel.delayData.currentPos = node.data.steerWheel.centerPos;
     }
-    m_ctrlSteerWheel.delayData.timer->start();
-    return;
+
+    updateSteerWheelPath(node);
 }
 
 // -------- key event --------

@@ -324,22 +324,20 @@ void InputConvertGame::getDelayQueue(const QPointF& start, const QPointF& end,
 
     double dx = x2 - x1;
     double dy = y2 - y1;
-
     double maxDist = qMax(fabs(dx), fabs(dy));
-
     int steps = qMax(1, static_cast<int>(ceil(maxDist / distanceStep)));
-
     double stepX = dx / steps;
     double stepY = dy / steps;
 
     for (int i = 0; i < steps; ++i) {
 
-        QPointF pos(x1 + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst),
-                    y1 + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst));
+        double idealX = x1 + (i + 1) * stepX;
+        double idealY = y1 + (i + 1) * stepY;
+
+        QPointF pos(idealX + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst),
+                    idealY + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst));
         queuePos.enqueue(pos);
         queueTimer.enqueue(QRandomGenerator::global()->bounded(lowestTimer, highestTimer));
-        x1 += stepX;
-        y1 += stepY;
     }
 }
 

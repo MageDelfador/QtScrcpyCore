@@ -346,6 +346,11 @@ void InputConvertGame::onSteerWheelTimer() {
         return;
     }
     int id = getTouchID(m_ctrlSteerWheel.touchKey);
+    if (id == -1) {
+        m_ctrlSteerWheel.delayData.queuePos.clear();
+        m_ctrlSteerWheel.delayData.queueTimer.clear();
+        return;
+    }
     m_ctrlSteerWheel.delayData.currentPos = m_ctrlSteerWheel.delayData.queuePos.dequeue();
     sendTouchMoveEvent(id, m_ctrlSteerWheel.delayData.currentPos);
 

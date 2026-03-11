@@ -606,8 +606,13 @@ bool InputConvertGame::processMouseMove(const QMouseEvent *from)
 
     if (m_ctrlMouseMove.ignoreCount > 0) {
         --m_ctrlMouseMove.ignoreCount;
-        return true;
+        //return true;
     }
+	
+	static QElapsedTimer throttleTimer;
+	if (!throttleTimer.isValid()) throttleTimer.start();
+	if (throttleTimer.elapsed() < 8) return true;
+	throttleTimer.restart();
 
     if (!lastPos.isNull() && m_processMouseMove) {
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))

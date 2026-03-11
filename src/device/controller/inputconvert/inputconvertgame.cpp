@@ -71,7 +71,7 @@ void InputConvertGame::updateSteerWheelPath(const KeyMap::KeyMapNode &node)
         offset.rx() -= node.data.steerWheel.left.extendOffset;
 
     const float shiftFactor = 2.0f;
-    if (m_shiftPressed && m_ctrlSteerWheel.pressedUp) {
+    if (m_shiftPressed && m_ctrlSteerWheel.pressedUp && (!m_ctrlSteerWheel.pressedDown)) {
         offset *= shiftFactor;
     }
 
@@ -713,6 +713,9 @@ void InputConvertGame::mouseMoveStopTouch()
     if (m_ctrlMouseMove.touching) {
         sendTouchUpEvent(getTouchID(Qt::ExtraButton24), m_ctrlMouseMove.lastConverPos);
         detachTouchID(Qt::ExtraButton24);
+        QPointF mouseMoveStartPos
+            = m_ctrlMouseMove.smallEyes ? m_keyMap.getMouseMoveMap().data.mouseMove.smallEyes.pos : m_keyMap.getMouseMoveMap().data.mouseMove.startPos;
+		m_ctrlMouseMove.lastConverPos = mouseMoveStartPos;
         m_ctrlMouseMove.touching = false;
     }
 }

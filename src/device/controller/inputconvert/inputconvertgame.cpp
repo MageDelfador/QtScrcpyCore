@@ -345,12 +345,19 @@ void InputConvertGame::onSteerWheelTimer() {
     if(m_ctrlSteerWheel.delayData.queuePos.empty()) {
         return;
     }
-    int id = getTouchID(m_ctrlSteerWheel.touchKey);
-    if (id == -1) {
-        m_ctrlSteerWheel.delayData.queuePos.clear();
-        m_ctrlSteerWheel.delayData.queueTimer.clear();
-        return;
-    }
+	
+	if(m_ctrlSteerWheel.touchKey == Qt::Key_unknown){
+		m_ctrlSteerWheel.delayData.queuePos.clear();
+		m_ctrlSteerWheel.delayData.queueTimer.clear();
+		return;
+	}
+	
+	int id = getTouchID(m_ctrlSteerWheel.touchKey);
+	if (id == -1) {
+		m_ctrlSteerWheel.delayData.queuePos.clear();
+		m_ctrlSteerWheel.delayData.queueTimer.clear();
+		return;
+	}
     m_ctrlSteerWheel.delayData.currentPos = m_ctrlSteerWheel.delayData.queuePos.dequeue();
     sendTouchMoveEvent(id, m_ctrlSteerWheel.delayData.currentPos);
 
@@ -376,7 +383,7 @@ void InputConvertGame::processSteerWheel(const KeyMap::KeyMapNode &node, const Q
         m_ctrlSteerWheel.pressedRight = flag;
     } else if (key == node.data.steerWheel.down.key) {
         m_ctrlSteerWheel.pressedDown = flag;
-    } else { // left
+    } else if (key == node.data.steerWheel.left.key) {
         m_ctrlSteerWheel.pressedLeft = flag;
     }
 
@@ -395,10 +402,12 @@ void InputConvertGame::processSteerWheel(const KeyMap::KeyMapNode &node, const Q
             m_ctrlSteerWheel.delayData.queueTimer.clear();
             m_ctrlSteerWheel.delayData.queuePos.clear();
         }
-        int id = getTouchID(m_ctrlSteerWheel.touchKey);
-		if (id != -1) {
-			sendTouchUpEvent(id, m_ctrlSteerWheel.delayData.currentPos);
-			detachTouchID(m_ctrlSteerWheel.touchKey);
+		if(m_ctrlSteerWheel.touchKey != Qt::Key_unknown){
+			int id = getTouchID(m_ctrlSteerWheel.touchKey);
+			if (id != -1) {
+				sendTouchUpEvent(id, m_ctrlSteerWheel.delayData.currentPos);
+				detachTouchID(m_ctrlSteerWheel.touchKey);
+			}
 		}
         return;
     }

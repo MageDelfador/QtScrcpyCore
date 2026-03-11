@@ -757,7 +757,6 @@ bool InputConvertGame::switchGameMap()
         m_ctrlSteerWheel.pressedDown = false;
         m_ctrlSteerWheel.pressedLeft = false;
         m_ctrlSteerWheel.delayData.pressedNum = 0;
-        m_ctrlSteerWheel.delayData.currentPos = QPointF();
 
         if (m_dragDelayData.timer) {
             m_dragDelayData.timer->stop();

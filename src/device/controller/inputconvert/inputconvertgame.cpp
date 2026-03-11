@@ -414,6 +414,13 @@ void InputConvertGame::processSteerWheel(const KeyMap::KeyMapNode &node, const Q
     }
 
     if (pressedNum == 1 && flag) {
+		if(m_ctrlSteerWheel.touchKey != Qt::Key_unknown){
+			int existingId = getTouchID(m_ctrlSteerWheel.touchKey);
+			if (existingId != -1) {
+				sendTouchUpEvent(existingId, m_ctrlSteerWheel.delayData.currentPos);
+				detachTouchID(m_ctrlSteerWheel.touchKey);
+			}
+		}
         m_ctrlSteerWheel.touchKey = node.data.steerWheel.up.key;
         int id = attachTouchID(m_ctrlSteerWheel.touchKey);
         sendTouchDownEvent(id, node.data.steerWheel.centerPos);

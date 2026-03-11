@@ -405,7 +405,7 @@ void InputConvertGame::processSteerWheel(const KeyMap::KeyMapNode &node, const Q
     }
 
     if (pressedNum == 1 && flag) {
-        m_ctrlSteerWheel.touchKey = from->key();
+        m_ctrlSteerWheel.touchKey = node.data.steerWheel.up.key;
         int id = attachTouchID(m_ctrlSteerWheel.touchKey);
         sendTouchDownEvent(id, node.data.steerWheel.centerPos);
         m_ctrlSteerWheel.delayData.currentPos = node.data.steerWheel.centerPos;

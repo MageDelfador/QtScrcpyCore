@@ -745,7 +745,7 @@ bool InputConvertGame::switchGameMap()
             m_ctrlSteerWheel.delayData.queuePos.clear();
             m_ctrlSteerWheel.delayData.queueTimer.clear();
         }
-		if(m_ctrlSteerWheel.touchKey != 0){
+		if(m_ctrlSteerWheel.touchKey != Qt::Key_unknown){
             int id = getTouchID(m_ctrlSteerWheel.touchKey);
             if (id != -1) {
                 sendTouchUpEvent(id, m_ctrlSteerWheel.delayData.currentPos);

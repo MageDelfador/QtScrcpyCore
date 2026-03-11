@@ -3,6 +3,7 @@
 
 #include <QPointF>
 #include <QQueue>
+#include <QRandomGenerator>
 
 #include "inputconvertnormal.h"
 #include "keymap.h"
@@ -78,6 +79,7 @@ private slots:
     void onDragTimer();
 
 private:
+    QRandomGenerator m_rng;
     QSize m_frameSize;
     QSize m_showSize;
     bool m_gameMap = false;

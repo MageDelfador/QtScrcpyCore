@@ -9,7 +9,7 @@
 
 #define CURSOR_POS_CHECK 50
 
-InputConvertGame::InputConvertGame(Controller *controller) : InputConvertNormal(controller) {
+InputConvertGame::InputConvertGame(Controller *controller) : InputConvertNormal(controller) , m_rng(QTime::currentTime().msecsSinceStartOfDay()){
     m_ctrlSteerWheel.delayData.timer = new QTimer(this);
     m_ctrlSteerWheel.delayData.timer->setSingleShot(true);
     connect(m_ctrlSteerWheel.delayData.timer, &QTimer::timeout, this, &InputConvertGame::onSteerWheelTimer);
@@ -334,10 +334,11 @@ void InputConvertGame::getDelayQueue(const QPointF& start, const QPointF& end,
         double idealX = x1 + (i + 1) * stepX;
         double idealY = y1 + (i + 1) * stepY;
 
-        QPointF pos(idealX + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst),
-                    idealY + (QRandomGenerator::global()->bounded(posStepconst * 2) - posStepconst));
-        queuePos.enqueue(pos);
-        queueTimer.enqueue(QRandomGenerator::global()->bounded(lowestTimer, highestTimer));
+		queuePos.enqueue(QPointF(
+			idealX + (m_rng.bounded(posStepconst * 2) - posStepconst),
+			idealY + (m_rng.bounded(posStepconst * 2) - posStepconst)
+		));
+		queueTimer.enqueue(m_rng.bounded(lowestTimer, highestTimer));
     }
 }
 

@@ -636,7 +636,7 @@ bool InputConvertGame::processMouseMove(const QMouseEvent *from)
                 });
             } else {
                 mouseMoveStopTouch();
-                m_ctrlMouseMove.ignoreCount = 8;
+                m_ctrlMouseMove.ignoreCount = 5;
                 return true;
             }
         }

@@ -606,7 +606,7 @@ bool InputConvertGame::processMouseMove(const QMouseEvent *from)
 
     if (m_ctrlMouseMove.ignoreCount > 0) {
         --m_ctrlMouseMove.ignoreCount;
-        //return true;
+        return true;
     }
 
     if (!lastPos.isNull() && m_processMouseMove) {
@@ -636,7 +636,7 @@ bool InputConvertGame::processMouseMove(const QMouseEvent *from)
                 });
             } else {
                 mouseMoveStopTouch();
-                m_ctrlMouseMove.ignoreCount = 5;
+                m_ctrlMouseMove.ignoreCount = 8;
                 return true;
             }
         }

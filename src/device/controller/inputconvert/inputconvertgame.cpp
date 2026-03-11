@@ -4,7 +4,6 @@
 #include <QTimer>
 #include <QTime>
 #include <QRandomGenerator>
-#include <QElapsedTimer>
 
 #include "inputconvertgame.h"
 
